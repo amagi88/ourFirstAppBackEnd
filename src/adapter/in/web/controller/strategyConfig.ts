@@ -1,10 +1,10 @@
+
+import { config } from "@/config";
 import Auth0Strategy, { StrategyOption } from "passport-auth0";
-import { config } from "../config";
 
 /**
  * Passport Configuration
  */
-
 export const strategy = new Auth0Strategy(
   {
     domain: config.Auth0.domain,
@@ -12,7 +12,7 @@ export const strategy = new Auth0Strategy(
     clientSecret: config.Auth0.secret,
     callbackURL: config.Auth0.url,
   } as StrategyOption,
-  (accessToken, refreshToken, extraParams, profile, done) => {
+  (_accessToken, _refreshToken, _extraParams, profile, done) => {
     /**
      * Access tokens are used to authorize users to an API
      * (resource server)

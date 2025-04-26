@@ -1,29 +1,31 @@
 import express from "express";
-import { router } from "./app";
-import { errorHandler } from "./errHandler";
 import expressSession from "express-session";
 import { CipherKey } from "crypto";
 import passport from "passport";
-import { strategy } from "./Controller/login";
+
+import { authenticationRoutes } from "@/adapter/in/web/router/authenticationRouter";
+import { strategy } from "@/adapter/in/web/controller/strategyConfig";
 
 const app = express();
 
-const session = {
+// セッション設定
+const sessionConfig = {
   secret: process.env.SESSION_SECRET as CipherKey | CipherKey[],
-  cookie: { path: "/", httpOnly: true, secure: false, maxAge: undefined },
+  cookie: { path: "/", httpOnly: true, secure: false, maxAge: 30 * 60 * 1000 },
   resave: false,
   saveUninitialized: false,
+  rolling: true,
 };
 
 if (app.get("env") === "production") {
-  // Serve secure cookies, requires HTTPS
-  session.cookie.secure = true;
+  sessionConfig.cookie.secure = true;
 }
 
-app.use(expressSession(session));
+app.use(expressSession(sessionConfig));
 passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
+
 passport.serializeUser((user, done) => {
   done(null, user);
 });
@@ -32,8 +34,6 @@ passport.deserializeUser((user, done) => {
   done(null, user as undefined);
 });
 
-app.use("/", router);
+app.use("/", authenticationRoutes);
 
-app.listen(8000, () => {
-  console.log("Start on port 8000");
-});
+export const server = app;
